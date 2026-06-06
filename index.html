@@ -113,12 +113,14 @@ textarea{resize:vertical;line-height:1.65}
 </head>
 <body>
 <div class="particles" id="particles"></div>
+
+
 <div id="app">
 
   <header class="hdr">
     <span class="hdr-badge">STUDIO LÉGENDE</span>
     <h1 class="hdr-title">CRÉATEUR DE LÉGENDES</h1>
-    <p class="hdr-sub">Propulsé par LLaMA 3 — Intelligence Zaga Spirit</p>
+    <p class="hdr-sub">Propulsé par LLaMA 3.3 — Intelligence Zaga Spirit</p>
   </header>
 
   <div class="tabs">
@@ -195,13 +197,13 @@ textarea{resize:vertical;line-height:1.65}
       <textarea id="v-description" rows="3" placeholder="Le message principal à transmettre..."></textarea>
       <label class="lbl">Mots-clés / Hashtags</label>
       <input type="text" id="v-hashtags" placeholder="Ex: immobilier, luxe, Dubai..."/>
-      <div class="ai-badge"><span class="ai-dot"></span> LLaMA 3 via Groq — Gratuit &amp; illimité</div>
+      <div class="ai-badge"><span class="ai-dot"></span> LLaMA 3.3 via Groq — Gratuit &amp; illimité</div>
     </div>
 
     <button class="btn-fire" id="generate-video-btn">✨ GÉNÉRER AVEC L'IA</button>
     <div class="loading" id="loading-video">
       <div class="loader-ring"></div>
-      <p class="loading-txt">LLaMA 3 crée votre brief vidéo... ✨</p>
+      <p class="loading-txt">LLaMA 3.3 crée votre brief vidéo... ✨</p>
     </div>
     <div class="result-wrap" id="result-video">
       <div class="result-block">
@@ -216,7 +218,7 @@ textarea{resize:vertical;line-height:1.65}
   <div class="section" id="section-text">
     <div class="card">
       <h2 class="card-hdr">✍️ GÉNÉRATEUR TEXTE IA</h2>
-      <div class="info">🤖 LLaMA 3 rédige votre texte sur mesure — légendes, scripts, accroches, emails et plus.</div>
+      <div class="info">🤖 LLaMA 3.3 rédige votre texte sur mesure — légendes, scripts, accroches, emails et plus.</div>
 
       <label class="lbl">Type de contenu</label>
       <select id="t-type">
@@ -255,7 +257,7 @@ textarea{resize:vertical;line-height:1.65}
     <button class="btn-fire" id="generate-text-btn">✨ RÉDIGER AVEC L'IA</button>
     <div class="loading" id="loading-text">
       <div class="loader-ring"></div>
-      <p class="loading-txt">LLaMA 3 rédige votre texte... ✨</p>
+      <p class="loading-txt">LLaMA 3.3 rédige votre texte... ✨</p>
     </div>
     <div class="result-wrap" id="result-text">
       <div class="result-block">
@@ -280,7 +282,7 @@ textarea{resize:vertical;line-height:1.65}
       <div class="chat-msgs" id="chat-msgs">
         <div class="cmsg ai">
           <div class="cmsg-lbl">STUDIO IA</div>
-          Bonjour ! Je suis votre assistant IA propulsé par LLaMA 3. Posez-moi n'importe quelle question sur le marketing, les réseaux sociaux ou votre visibilité digitale. 🚀
+          Bonjour ! Je suis votre assistant IA propulsé par LLaMA 3.3. Posez-moi n'importe quelle question sur le marketing, les réseaux sociaux ou votre visibilité digitale. 🚀
         </div>
       </div>
       <div class="chat-quick">
@@ -289,7 +291,7 @@ textarea{resize:vertical;line-height:1.65}
         <button class="cq-btn" data-q="Comment booster mon engagement sur TikTok rapidement ?">📈 Booster TikTok</button>
         <button class="cq-btn" data-q="Donne-moi 5 idées de contenu créatif pour cette semaine.">📅 Idées contenu</button>
       </div>
-      <div class="chat-notice" id="chat-notice">⚡ LLaMA 3 via Groq — Gratuit &amp; illimité</div>
+      <div class="chat-notice" id="chat-notice">⚡ LLaMA 3.3 via Groq — Gratuit &amp; illimité</div>
       <div class="chat-input-row">
         <input class="chat-inp" id="chat-inp" type="text" placeholder="Posez votre question..."/>
         <button class="chat-send" id="chat-send">➤</button>
@@ -302,20 +304,28 @@ textarea{resize:vertical;line-height:1.65}
 
 <script>
 // ============================================================
-// GROQ API — LLaMA 3 GRATUIT
+// GROQ API — CLÉ STOCKÉE EN SESSION (jamais en clair dans le code)
 // ============================================================
-var GROQ_KEY   = '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';
 var GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
-var GROQ_MODEL = 'llama3-8b-8192';
+var GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 var SYSTEM_PROMPT = "Tu es un expert en marketing digital, création de contenu et réseaux sociaux, spécialisé dans le marché de Dubai et les pays arabes. Tu réponds toujours en français, de façon claire, professionnelle et actionnable. Tu es l'assistant de Studio Légende par Zaga Spirit.";
 
+// Clé intégrée
+var GROQ_KEY = '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';
+function getKey() {
+  return GROQ_KEY;
+}
+
+
 async function callGroq(userMessage) {
+  var key = getKey();
+  if (!key) throw new Error('Clé API manquante — entrez votre clé Groq');
   var response = await fetch(GROQ_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + GROQ_KEY
+      'Authorization': 'Bearer ' + key
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
@@ -342,12 +352,14 @@ async function testConnection() {
   var statusEl = document.getElementById('ia-status');
   var modelEl  = document.getElementById('ia-model');
   var noticeEl = document.getElementById('chat-notice');
+
+
   try {
     await callGroq('Réponds juste "OK" en un mot.');
     statusEl.textContent = '● EN LIGNE';
     statusEl.style.color = '#00CC66';
-    modelEl.textContent  = 'LLaMA 3 · Groq';
-    noticeEl.textContent = '⚡ LLaMA 3 via Groq — Gratuit & illimité';
+    modelEl.textContent  = 'LLaMA 3.3 · Groq';
+    noticeEl.textContent = '⚡ LLaMA 3.3 via Groq — Gratuit & illimité';
   } catch(e) {
     statusEl.textContent = '● Erreur clé API';
     statusEl.style.color = '#FF4500';
@@ -359,6 +371,7 @@ async function testConnection() {
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
+
 
   // Particules
   var pc = document.getElementById('particles');
@@ -477,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var result = await callGroq(prompt);
       resTxt.textContent = result;
       resWrap.classList.add('show');
-      showNotif('✅ Brief généré par LLaMA 3 !');
+      showNotif('✅ Brief généré par LLaMA 3.3 !');
     } catch(err) {
       resTxt.textContent = '❌ Erreur : ' + err.message;
       resWrap.classList.add('show');
@@ -517,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var result = await callGroq(prompt);
       resTxt.textContent = result;
       resWrap.classList.add('show');
-      showNotif('✅ Texte rédigé par LLaMA 3 !');
+      showNotif('✅ Texte rédigé par LLaMA 3.3 !');
     } catch(err) {
       resTxt.textContent = '❌ Erreur : ' + err.message;
       resWrap.classList.add('show');
@@ -571,12 +584,13 @@ document.addEventListener('DOMContentLoaded', function() {
     chatHistory.push({ role: 'user', content: text });
     var typing = addTyping();
     try {
-      // Appel avec historique pour contexte de conversation
+      var key = getKey();
+      if (!key) throw new Error('Clé API manquante');
       var response = await fetch(GROQ_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + GROQ_KEY
+          'Authorization': 'Bearer ' + key
         },
         body: JSON.stringify({
           model: GROQ_MODEL,
@@ -589,13 +603,12 @@ document.addEventListener('DOMContentLoaded', function() {
       var data = await response.json();
       var reply = data.choices[0].message.content;
       chatHistory.push({ role: 'assistant', content: reply });
-      // Limite historique à 20 messages pour performance
       if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
       typing.remove();
       addMsg(reply, 'ai');
     } catch(err) {
       typing.remove();
-      addMsg('Erreur de connexion : ' + err.message + '. Vérifiez votre connexion internet.', 'error');
+      addMsg('Erreur de connexion : ' + err.message, 'error');
     } finally {
       chatSend.disabled = false;
       chatInp.focus();
@@ -608,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.addEventListener('click', function() { sendMessage(this.dataset.q); });
   });
 
-  // Test connexion
+  // Test connexion au démarrage
   testConnection();
 
 });
