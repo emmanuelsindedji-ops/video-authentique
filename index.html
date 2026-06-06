@@ -1,1 +1,617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#050008"/>
+<title>Studio Légende — Visibilité Automatique</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--gold:#FFD700;--fire:#FF4500;--purple:#8B00FF;--dark:#050008;--card:#ffffff09;--border:#ffffff12;--text:#F5F0FF;--sub:#9980C8}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,#2D005088 0%,transparent 55%),radial-gradient(ellipse at 80% 100%,#1A003088 0%,transparent 55%);z-index:0;pointer-events:none}
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+.p{position:absolute;border-radius:50%;animation:float var(--d) ease-in-out infinite alternate}
+@keyframes float{0%{transform:translateY(0) scale(1);opacity:.4}100%{transform:translateY(-30px) scale(1.3);opacity:.9}}
+#app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding-bottom:40px}
+.hdr{padding:24px 18px 0;text-align:center}
+.hdr-badge{display:inline-block;background:linear-gradient(135deg,var(--purple),var(--gold));border-radius:30px;padding:6px 18px;font-size:11px;font-weight:800;color:#000;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;box-shadow:0 0 20px #8B00FF66}
+.hdr-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:3px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.hdr-sub{font-size:13px;color:var(--sub);margin-top:6px;letter-spacing:1px}
+.tabs{display:flex;gap:0;margin:20px 18px 0;background:#ffffff08;border-radius:14px;padding:4px}
+.tab{flex:1;padding:10px 6px;text-align:center;border-radius:11px;cursor:pointer;font-size:12px;font-weight:700;color:#666;transition:all .25s;border:none;background:transparent;font-family:inherit}
+.tab.active{background:linear-gradient(135deg,var(--purple),var(--fire));color:#fff;box-shadow:0 4px 14px #8B00FF55}
+.section{padding:16px 18px;display:none}
+.section.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:14px}
+.card-hdr{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.styles-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.style-card{background:#ffffff08;border:2px solid transparent;border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .25s;-webkit-user-select:none;user-select:none}
+.style-card:active{transform:scale(0.97)}
+.style-card.active{border-color:var(--gold);background:#FFD70012;box-shadow:0 0 16px #FFD70033}
+.style-icon{font-size:32px;margin-bottom:6px}
+.style-name{font-size:12px;font-weight:800;color:#E0D0FF;margin-bottom:3px}
+.style-desc{font-size:10px;color:#666;line-height:1.4}
+.media-zone{border:2px dashed #8B00FF44;border-radius:16px;padding:24px 16px;text-align:center;transition:all .3s;background:#8B00FF06;margin-bottom:12px}
+.media-zone.has-media{border-color:var(--gold);background:#FFD70008;border-style:solid}
+.mz-icon{font-size:40px;margin-bottom:8px}
+.mz-title{font-size:14px;font-weight:700;color:#ccc;margin-bottom:4px}
+.mz-sub{font-size:11px;color:#555;line-height:1.6}
+#media-input{display:none}
+.media-btn{display:inline-block;margin-top:10px;padding:10px 22px;background:linear-gradient(135deg,var(--purple),var(--fire));border:none;border-radius:10px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.media-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center}
+.media-item{position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;border:2px solid var(--gold);flex-shrink:0}
+.media-item img,.media-item video{width:100%;height:100%;object-fit:cover;display:block}
+.media-item .del{position:absolute;top:2px;right:2px;background:#ff000099;border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;z-index:4;font-weight:900}
+.media-count{font-size:11px;color:var(--gold);margin-top:6px;font-weight:700;text-align:center}
+.dur-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.dur-btn{background:#ffffff08;border:1px solid var(--border);border-radius:10px;padding:9px 4px;text-align:center;cursor:pointer;transition:all .2s;font-family:inherit;-webkit-user-select:none;user-select:none}
+.dur-btn.active{background:#FFD70018;border-color:var(--gold)}
+.dur-btn .dur-time{font-size:13px;font-weight:800;color:#E0D0FF}
+.dur-btn.active .dur-time{color:var(--gold)}
+.dur-btn .dur-lbl{font-size:9px;color:#666;margin-top:2px}
+.plat-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.plat-btn{background:#ffffff08;border:1px solid var(--border);border-radius:10px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:700;color:#888;transition:all .2s;font-family:inherit;-webkit-user-select:none;user-select:none}
+.plat-btn.active{background:#8B00FF20;border-color:#8B00FF66;color:#C084FC}
+label.lbl{font-size:10px;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:6px;margin-top:2px}
+input,select,textarea{width:100%;background:#ffffff08;border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14px;margin-bottom:10px;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:#8B00FF77}
+select{background:#0A000F}
+select option{background:#0A000F}
+textarea{resize:vertical;line-height:1.65}
+.tone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.tone-btn{background:#ffffff08;border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:#888;transition:all .2s;-webkit-user-select:none;user-select:none}
+.tone-btn.active{background:#8B00FF20;border-color:#8B00FF66;color:#C084FC}
+.btn-fire{width:100%;background:linear-gradient(135deg,#8B00FF,#FF4500,#FFD700);border:none;border-radius:14px;padding:17px;color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;box-shadow:0 6px 28px #8B00FF55;transition:all .3s;background-size:200% 200%;animation:gradShift 3s ease infinite}
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.btn-fire:disabled{opacity:.6;animation:none;cursor:not-allowed}
+.btn-copy{width:100%;background:#FFD70012;border:1px solid #FFD70030;border-radius:11px;padding:11px;color:var(--gold);font-weight:700;cursor:pointer;font-size:14px;margin-top:8px;font-family:inherit}
+.result-wrap{display:none;margin-top:16px;animation:fadeUp .4s ease}
+.result-wrap.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.result-block{background:linear-gradient(135deg,#0A000F,#12001A);border:1px solid #8B00FF33;border-radius:16px;padding:16px;margin-bottom:12px}
+.result-lbl{font-size:10px;color:var(--sub);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.result-lbl::after{content:'';flex:1;height:1px;background:#ffffff10}
+.result-txt{font-size:14px;line-height:1.75;color:#E8D8FF;white-space:pre-wrap;word-break:break-word}
+.loading{display:none;text-align:center;padding:28px 0}
+.loading.show{display:block}
+.loader-ring{width:48px;height:48px;border-radius:50%;border:3px solid #8B00FF22;border-top:3px solid #8B00FF;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{color:#C084FC;font-size:13px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.notif{position:fixed;top:14px;left:14px;right:14px;background:#0A000F;border:1px solid #8B00FF55;border-radius:14px;padding:14px 16px;z-index:9999;font-size:14px;font-weight:700;box-shadow:0 8px 32px #00000099;max-width:520px;margin:0 auto;transform:translateY(-80px);opacity:0;transition:transform .3s ease,opacity .3s ease;pointer-events:none}
+.notif.show{transform:translateY(0);opacity:1}
+.chat-wrap{background:#0A000F;border:1px solid #8B00FF33;border-radius:18px;overflow:hidden;margin-bottom:14px}
+.chat-hdr{background:linear-gradient(135deg,rgba(139,0,255,.25),rgba(255,69,0,.1));padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #8B00FF22}
+.chat-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--purple),var(--fire));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.chat-name{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#E8D8FF}
+.chat-online{font-size:10px;letter-spacing:1px}
+.chat-model{font-size:10px;color:#555;margin-left:auto;letter-spacing:1px}
+.chat-msgs{padding:14px;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.cmsg{max-width:85%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.6}
+.cmsg.ai{background:#12001A;border:1px solid #8B00FF22;color:#E8D8FF;align-self:flex-start;border-bottom-left-radius:4px}
+.cmsg.user{background:linear-gradient(135deg,var(--purple),var(--fire));color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.cmsg.error{background:#1A0000;border:1px solid #FF000033;color:#FF8888;align-self:flex-start}
+.cmsg-lbl{font-size:9px;letter-spacing:2px;color:#8B00FF;margin-bottom:4px;font-weight:800}
+.typing span{width:6px;height:6px;background:#8B00FF;border-radius:50%;animation:bounce 1.2s infinite;display:inline-block;margin:0 2px}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+.chat-quick{padding:0 14px 10px;display:flex;flex-wrap:wrap;gap:6px}
+.cq-btn{padding:5px 11px;background:#8B00FF12;border:1px solid #8B00FF30;border-radius:14px;color:#C084FC;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700}
+.chat-notice{padding:6px 14px;background:#00CC6608;border-top:1px solid #00CC6615;font-size:10px;color:#00884A;text-align:center;letter-spacing:1px}
+.chat-input-row{padding:10px 14px;border-top:1px solid #8B00FF15;display:flex;gap:8px;align-items:center}
+.chat-inp{flex:1;background:#ffffff08;border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin:0;-webkit-appearance:none}
+.chat-inp:focus{border-color:#8B00FF55}
+.chat-send{width:40px;height:40px;background:linear-gradient(135deg,var(--purple),var(--fire));border:none;border-radius:10px;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-send:disabled{opacity:.5;cursor:not-allowed}
+.info{background:#FFD70010;border:1px solid #FFD70025;border-radius:12px;padding:12px;font-size:13px;color:#FFD700;line-height:1.6;margin-bottom:12px}
+.ai-badge{display:inline-flex;align-items:center;gap:6px;background:#00CC6610;border:1px solid #00CC6630;border-radius:8px;padding:4px 10px;font-size:10px;color:#00CC66;font-weight:700;margin-bottom:10px;letter-spacing:1px}
+.ai-dot{width:6px;height:6px;background:#00CC66;border-radius:50%;animation:pulse 1.5s infinite}
+</style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<div id="app">
 
+  <header class="hdr">
+    <span class="hdr-badge">STUDIO LÉGENDE</span>
+    <h1 class="hdr-title">CRÉATEUR DE LÉGENDES</h1>
+    <p class="hdr-sub">Propulsé par LLaMA 3 — Intelligence Zaga Spirit</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="video">🎬 Montage</button>
+    <button class="tab" data-tab="text">✍️ Texte IA</button>
+    <button class="tab" data-tab="chat">🤖 Assistant</button>
+  </div>
+
+  <!-- ONGLET 1 : MONTAGE VIDÉO -->
+  <div class="section active" id="section-video">
+    <div class="card">
+      <h2 class="card-hdr">🎨 STYLE DU MONTAGE</h2>
+      <div class="styles-grid">
+        <div class="style-card active" data-style="Moderne et dynamique">
+          <div class="style-icon">⚡</div>
+          <div class="style-name">MODERNE</div>
+          <div class="style-desc">Dynamique &amp; percutant</div>
+        </div>
+        <div class="style-card" data-style="Élégant et luxueux">
+          <div class="style-icon">💎</div>
+          <div class="style-name">ÉLÉGANT</div>
+          <div class="style-desc">Luxe &amp; professionnel</div>
+        </div>
+        <div class="style-card" data-style="Social media viral">
+          <div class="style-icon">📱</div>
+          <div class="style-name">SOCIAL</div>
+          <div class="style-desc">TikTok / Reels / Shorts</div>
+        </div>
+        <div class="style-card" data-style="Corporate et professionnel">
+          <div class="style-icon">💼</div>
+          <div class="style-name">AFFAIRES</div>
+          <div class="style-desc">Entreprise &amp; immobilier</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-hdr">📂 VOS MÉDIAS</h2>
+      <input type="file" id="media-input" multiple accept="image/*,video/*"/>
+      <div class="media-zone" id="media-zone">
+        <div class="mz-icon">📤</div>
+        <div class="mz-title">Photos ou vidéos</div>
+        <div class="mz-sub">Cliquez sur le bouton ci-dessous</div>
+        <button class="media-btn" id="media-btn" type="button">CHOISIR LES FICHIERS</button>
+        <div class="media-list" id="media-list"></div>
+        <div class="media-count" id="media-count">0 fichier(s) sélectionné(s)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-hdr">⏱️ DURÉE &amp; PLATEFORME</h2>
+      <label class="lbl">Durée</label>
+      <div class="dur-grid">
+        <div class="dur-btn active" data-dur="15 secondes"><div class="dur-time">15s</div><div class="dur-lbl">Courte</div></div>
+        <div class="dur-btn" data-dur="30 secondes"><div class="dur-time">30s</div><div class="dur-lbl">Moyenne</div></div>
+        <div class="dur-btn" data-dur="60 secondes"><div class="dur-time">60s</div><div class="dur-lbl">Longue</div></div>
+        <div class="dur-btn" data-dur="automatique"><div class="dur-time">Auto</div><div class="dur-lbl">Adaptée</div></div>
+      </div>
+      <label class="lbl" style="margin-top:8px">Plateforme</label>
+      <div class="plat-row">
+        <div class="plat-btn active" data-plat="TikTok">TikTok</div>
+        <div class="plat-btn" data-plat="Instagram">Instagram</div>
+        <div class="plat-btn" data-plat="YouTube">YouTube</div>
+        <div class="plat-btn" data-plat="Facebook">Facebook</div>
+        <div class="plat-btn" data-plat="LinkedIn">LinkedIn</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-hdr">📝 VOTRE MESSAGE</h2>
+      <label class="lbl">Titre principal</label>
+      <input type="text" id="v-title" placeholder="Ex: Nouveau projet immobilier exceptionnel..."/>
+      <label class="lbl">Description</label>
+      <textarea id="v-description" rows="3" placeholder="Le message principal à transmettre..."></textarea>
+      <label class="lbl">Mots-clés / Hashtags</label>
+      <input type="text" id="v-hashtags" placeholder="Ex: immobilier, luxe, Dubai..."/>
+      <div class="ai-badge"><span class="ai-dot"></span> LLaMA 3 via Groq — Gratuit &amp; illimité</div>
+    </div>
+
+    <button class="btn-fire" id="generate-video-btn">✨ GÉNÉRER AVEC L'IA</button>
+    <div class="loading" id="loading-video">
+      <div class="loader-ring"></div>
+      <p class="loading-txt">LLaMA 3 crée votre brief vidéo... ✨</p>
+    </div>
+    <div class="result-wrap" id="result-video">
+      <div class="result-block">
+        <div class="result-lbl">✅ BRIEF GÉNÉRÉ PAR L'IA</div>
+        <div class="result-txt" id="result-video-txt"></div>
+        <button class="btn-copy" id="copy-video-btn">📋 COPIER</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONGLET 2 : GÉNÉRATEUR TEXTE -->
+  <div class="section" id="section-text">
+    <div class="card">
+      <h2 class="card-hdr">✍️ GÉNÉRATEUR TEXTE IA</h2>
+      <div class="info">🤖 LLaMA 3 rédige votre texte sur mesure — légendes, scripts, accroches, emails et plus.</div>
+
+      <label class="lbl">Type de contenu</label>
+      <select id="t-type">
+        <option value="légende Instagram ou TikTok">Légende Instagram / TikTok</option>
+        <option value="script vidéo court">Script vidéo</option>
+        <option value="bio de profil professionnel">Bio profil</option>
+        <option value="accroche publicitaire percutante">Accroche publicitaire</option>
+        <option value="email marketing professionnel">Email marketing</option>
+        <option value="SMS commercial court">SMS commercial</option>
+      </select>
+
+      <label class="lbl">Ton souhaité</label>
+      <div class="tone-grid">
+        <div class="tone-btn active" data-tone="professionnel">💼 Pro</div>
+        <div class="tone-btn" data-tone="enthousiaste">🔥 Enthousiaste</div>
+        <div class="tone-btn" data-tone="luxueux">💎 Luxe</div>
+        <div class="tone-btn" data-tone="décontracté">😎 Casual</div>
+        <div class="tone-btn" data-tone="urgent">⚡ Urgent</div>
+        <div class="tone-btn" data-tone="inspirant">🌟 Inspirant</div>
+      </div>
+
+      <label class="lbl">Votre activité / produit</label>
+      <input type="text" id="t-activity" placeholder="Ex: agence immobilière Dubai, restaurant, coach..."/>
+
+      <label class="lbl">Message clé à transmettre</label>
+      <textarea id="t-message" rows="3" placeholder="Ex: Nouveau projet, offre spéciale, ouverture..."></textarea>
+
+      <label class="lbl">Longueur</label>
+      <select id="t-length">
+        <option value="très court, 1 à 2 phrases maximum">Court (1-2 phrases)</option>
+        <option value="moyen, environ 1 paragraphe" selected>Moyen (1 paragraphe)</option>
+        <option value="long et détaillé, 2 à 3 paragraphes">Long (2-3 paragraphes)</option>
+      </select>
+    </div>
+
+    <button class="btn-fire" id="generate-text-btn">✨ RÉDIGER AVEC L'IA</button>
+    <div class="loading" id="loading-text">
+      <div class="loader-ring"></div>
+      <p class="loading-txt">LLaMA 3 rédige votre texte... ✨</p>
+    </div>
+    <div class="result-wrap" id="result-text">
+      <div class="result-block">
+        <div class="result-lbl">✅ TEXTE RÉDIGÉ PAR L'IA</div>
+        <div class="result-txt" id="result-text-txt"></div>
+        <button class="btn-copy" id="copy-text-btn">📋 COPIER</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONGLET 3 : ASSISTANT CHAT -->
+  <div class="section" id="section-chat">
+    <div class="chat-wrap">
+      <div class="chat-hdr">
+        <div class="chat-avatar">🤖</div>
+        <div>
+          <div class="chat-name">STUDIO IA</div>
+          <div class="chat-online" id="ia-status" style="color:#FFD700">● Initialisation...</div>
+        </div>
+        <div class="chat-model" id="ia-model"></div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="cmsg ai">
+          <div class="cmsg-lbl">STUDIO IA</div>
+          Bonjour ! Je suis votre assistant IA propulsé par LLaMA 3. Posez-moi n'importe quelle question sur le marketing, les réseaux sociaux ou votre visibilité digitale. 🚀
+        </div>
+      </div>
+      <div class="chat-quick">
+        <button class="cq-btn" data-q="Comment créer une légende percutante pour Instagram ?">💡 Légende Instagram</button>
+        <button class="cq-btn" data-q="Quels hashtags utiliser pour l'immobilier à Dubai ?">🏠 Hashtags Dubai</button>
+        <button class="cq-btn" data-q="Comment booster mon engagement sur TikTok rapidement ?">📈 Booster TikTok</button>
+        <button class="cq-btn" data-q="Donne-moi 5 idées de contenu créatif pour cette semaine.">📅 Idées contenu</button>
+      </div>
+      <div class="chat-notice" id="chat-notice">⚡ LLaMA 3 via Groq — Gratuit &amp; illimité</div>
+      <div class="chat-input-row">
+        <input class="chat-inp" id="chat-inp" type="text" placeholder="Posez votre question..."/>
+        <button class="chat-send" id="chat-send">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="notif" id="global-notif"></div>
+
+<script>
+// ============================================================
+// GROQ API — LLaMA 3 GRATUIT
+// ============================================================
+var GROQ_KEY   = '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';
+var GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+var GROQ_MODEL = 'llama3-8b-8192';
+
+var SYSTEM_PROMPT = "Tu es un expert en marketing digital, création de contenu et réseaux sociaux, spécialisé dans le marché de Dubai et les pays arabes. Tu réponds toujours en français, de façon claire, professionnelle et actionnable. Tu es l'assistant de Studio Légende par Zaga Spirit.";
+
+async function callGroq(userMessage) {
+  var response = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + GROQ_KEY
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user',   content: userMessage }
+      ],
+      max_tokens: 1024,
+      temperature: 0.7
+    })
+  });
+  if (!response.ok) {
+    var err = await response.json().catch(function(){ return {}; });
+    throw new Error(err.error && err.error.message ? err.error.message : 'Erreur ' + response.status);
+  }
+  var data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// ============================================================
+// TEST CONNEXION
+// ============================================================
+async function testConnection() {
+  var statusEl = document.getElementById('ia-status');
+  var modelEl  = document.getElementById('ia-model');
+  var noticeEl = document.getElementById('chat-notice');
+  try {
+    await callGroq('Réponds juste "OK" en un mot.');
+    statusEl.textContent = '● EN LIGNE';
+    statusEl.style.color = '#00CC66';
+    modelEl.textContent  = 'LLaMA 3 · Groq';
+    noticeEl.textContent = '⚡ LLaMA 3 via Groq — Gratuit & illimité';
+  } catch(e) {
+    statusEl.textContent = '● Erreur clé API';
+    statusEl.style.color = '#FF4500';
+    modelEl.textContent  = e.message;
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Particules
+  var pc = document.getElementById('particles');
+  for (var i = 0; i < 18; i++) {
+    var p = document.createElement('div');
+    p.className = 'p';
+    var size = Math.random() * 4 + 2;
+    var colors = ['#8B00FF','#FF4500','#FFD700','#C084FC'];
+    p.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;background:'+colors[Math.floor(Math.random()*colors.length)]+';--d:'+(3+Math.random()*5)+'s;animation-delay:'+(Math.random()*4)+'s;';
+    pc.appendChild(p);
+  }
+
+  // Notification
+  function showNotif(msg) {
+    var n = document.getElementById('global-notif');
+    n.textContent = msg;
+    n.classList.add('show');
+    setTimeout(function(){ n.classList.remove('show'); }, 2800);
+  }
+
+  // Onglets
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+      tab.classList.add('active');
+      var s = document.getElementById('section-' + tab.dataset.tab);
+      if (s) s.classList.add('active');
+    });
+  });
+
+  // Sélections
+  function makeExclusive(selector) {
+    document.querySelectorAll(selector).forEach(function(el) {
+      el.addEventListener('click', function() {
+        document.querySelectorAll(selector).forEach(function(x){ x.classList.remove('active'); });
+        el.classList.add('active');
+      });
+    });
+  }
+  makeExclusive('.style-card');
+  makeExclusive('.dur-btn');
+  makeExclusive('.plat-btn');
+  makeExclusive('.tone-btn');
+
+  // Médias
+  var mediaInput = document.getElementById('media-input');
+  var mediaBtn   = document.getElementById('media-btn');
+  var mediaZone  = document.getElementById('media-zone');
+  var mediaList  = document.getElementById('media-list');
+  var mediaCount = document.getElementById('media-count');
+  var filesArray = [];
+
+  mediaBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    mediaInput.click();
+  });
+
+  mediaInput.addEventListener('change', function() {
+    var newFiles = Array.from(mediaInput.files);
+    if (!newFiles.length) return;
+    filesArray = filesArray.concat(newFiles);
+    renderMedia();
+    mediaZone.classList.add('has-media');
+    showNotif('✅ ' + newFiles.length + ' fichier(s) ajouté(s)');
+    mediaInput.value = '';
+  });
+
+  function renderMedia() {
+    mediaList.innerHTML = '';
+    filesArray.forEach(function(file, idx) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var item = document.createElement('div');
+        item.className = 'media-item';
+        var isVid = file.type.startsWith('video/');
+        item.innerHTML = (isVid
+          ? '<video src="'+ev.target.result+'" muted playsinline></video>'
+          : '<img src="'+ev.target.result+'" alt="Média"/>') +
+          '<button class="del" type="button" data-i="'+idx+'">×</button>';
+        mediaList.appendChild(item);
+        item.querySelector('.del').addEventListener('click', function() {
+          filesArray.splice(parseInt(this.dataset.i), 1);
+          renderMedia();
+          if (!filesArray.length) mediaZone.classList.remove('has-media');
+          showNotif('🗑️ Fichier supprimé');
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+    mediaCount.textContent = filesArray.length + ' fichier(s) sélectionné(s)';
+  }
+
+  // ---- GÉNÉRATEUR VIDÉO ----
+  document.getElementById('generate-video-btn').addEventListener('click', async function() {
+    var titre       = document.getElementById('v-title').value.trim() || 'Sans titre';
+    var description = document.getElementById('v-description').value.trim() || 'Non précisé';
+    var hashtags    = document.getElementById('v-hashtags').value.trim() || 'contenu, création, visibilité';
+    var style       = (document.querySelector('.style-card.active')||{dataset:{style:'Moderne'}}).dataset.style;
+    var duree       = (document.querySelector('.dur-btn.active')||{dataset:{dur:'15 secondes'}}).dataset.dur;
+    var plateforme  = (document.querySelector('.plat-btn.active')||{dataset:{plat:'TikTok'}}).dataset.plat;
+
+    var loadEl  = document.getElementById('loading-video');
+    var resWrap = document.getElementById('result-video');
+    var resTxt  = document.getElementById('result-video-txt');
+    var btn     = this;
+
+    loadEl.classList.add('show');
+    resWrap.classList.remove('show');
+    btn.disabled = true;
+
+    var prompt = 'Génère un brief vidéo complet et professionnel pour :\n- Style : ' + style + '\n- Durée : ' + duree + '\n- Plateforme : ' + plateforme + '\n- Titre : ' + titre + '\n- Message : ' + description + '\n- Mots-clés : ' + hashtags + '\n- Médias disponibles : ' + filesArray.length + ' fichier(s)\n\nFournis : structure scène par scène, textes à afficher à l\'écran, conseils de montage, musique recommandée, hashtags optimisés pour ' + plateforme + ', et conseil d\'engagement. Sois très concret et actionnable.';
+
+    try {
+      var result = await callGroq(prompt);
+      resTxt.textContent = result;
+      resWrap.classList.add('show');
+      showNotif('✅ Brief généré par LLaMA 3 !');
+    } catch(err) {
+      resTxt.textContent = '❌ Erreur : ' + err.message;
+      resWrap.classList.add('show');
+      showNotif('❌ ' + err.message);
+    } finally {
+      loadEl.classList.remove('show');
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('copy-video-btn').addEventListener('click', function() {
+    navigator.clipboard.writeText(document.getElementById('result-video-txt').textContent)
+      .then(function(){ showNotif('📋 Copié !'); })
+      .catch(function(){ showNotif('❌ Erreur de copie'); });
+  });
+
+  // ---- GÉNÉRATEUR TEXTE ----
+  document.getElementById('generate-text-btn').addEventListener('click', async function() {
+    var type     = document.getElementById('t-type').value;
+    var tone     = (document.querySelector('.tone-btn.active')||{dataset:{tone:'professionnel'}}).dataset.tone;
+    var activity = document.getElementById('t-activity').value.trim() || 'mon activité';
+    var message  = document.getElementById('t-message').value.trim() || 'un message important';
+    var length   = document.getElementById('t-length').value;
+
+    var loadEl  = document.getElementById('loading-text');
+    var resWrap = document.getElementById('result-text');
+    var resTxt  = document.getElementById('result-text-txt');
+    var btn     = this;
+
+    loadEl.classList.add('show');
+    resWrap.classList.remove('show');
+    btn.disabled = true;
+
+    var prompt = 'Rédige un(e) ' + type + ' avec ces caractéristiques :\n- Ton : ' + tone + '\n- Activité / Produit : ' + activity + '\n- Message clé : ' + message + '\n- Longueur : ' + length + '\n\nRédige UNIQUEMENT le texte final prêt à publier, sans introduction ni explication. Inclus les emojis appropriés et les hashtags si pertinent pour le type de contenu.';
+
+    try {
+      var result = await callGroq(prompt);
+      resTxt.textContent = result;
+      resWrap.classList.add('show');
+      showNotif('✅ Texte rédigé par LLaMA 3 !');
+    } catch(err) {
+      resTxt.textContent = '❌ Erreur : ' + err.message;
+      resWrap.classList.add('show');
+      showNotif('❌ ' + err.message);
+    } finally {
+      loadEl.classList.remove('show');
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('copy-text-btn').addEventListener('click', function() {
+    navigator.clipboard.writeText(document.getElementById('result-text-txt').textContent)
+      .then(function(){ showNotif('📋 Copié !'); })
+      .catch(function(){ showNotif('❌ Erreur de copie'); });
+  });
+
+  // ---- CHAT ----
+  var chatMsgs = document.getElementById('chat-msgs');
+  var chatInp  = document.getElementById('chat-inp');
+  var chatSend = document.getElementById('chat-send');
+  var chatHistory = [];
+
+  function addMsg(text, type) {
+    var div = document.createElement('div');
+    div.className = 'cmsg ' + type;
+    if (type === 'ai' || type === 'error') {
+      var lbl = type === 'ai' ? 'STUDIO IA' : 'ERREUR';
+      div.innerHTML = '<div class="cmsg-lbl">' + lbl + '</div>' + text.replace(/\n/g,'<br>');
+    } else {
+      div.textContent = text;
+    }
+    chatMsgs.appendChild(div);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  }
+
+  function addTyping() {
+    var div = document.createElement('div');
+    div.className = 'cmsg ai typing';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    chatMsgs.appendChild(div);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    return div;
+  }
+
+  async function sendMessage(text) {
+    text = text.trim();
+    if (!text) return;
+    chatInp.value = '';
+    chatSend.disabled = true;
+    addMsg(text, 'user');
+    chatHistory.push({ role: 'user', content: text });
+    var typing = addTyping();
+    try {
+      // Appel avec historique pour contexte de conversation
+      var response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_KEY
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }].concat(chatHistory),
+          max_tokens: 1024,
+          temperature: 0.75
+        })
+      });
+      if (!response.ok) throw new Error('Erreur ' + response.status);
+      var data = await response.json();
+      var reply = data.choices[0].message.content;
+      chatHistory.push({ role: 'assistant', content: reply });
+      // Limite historique à 20 messages pour performance
+      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+      typing.remove();
+      addMsg(reply, 'ai');
+    } catch(err) {
+      typing.remove();
+      addMsg('Erreur de connexion : ' + err.message + '. Vérifiez votre connexion internet.', 'error');
+    } finally {
+      chatSend.disabled = false;
+      chatInp.focus();
+    }
+  }
+
+  chatSend.addEventListener('click', function() { sendMessage(chatInp.value); });
+  chatInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') sendMessage(chatInp.value); });
+  document.querySelectorAll('.cq-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { sendMessage(this.dataset.q); });
+  });
+
+  // Test connexion
+  testConnection();
+
+});
+</script>
+</body>
+</html>
